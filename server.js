@@ -55,6 +55,10 @@ async function createAdminUser() {
   }
 }
 
+app.get("/", (req, res) => {
+  res.send("Printo Payroll Backend is running 🚀");
+});
+
 createAdminUser();
 
 // ---------- START SERVER ----------
