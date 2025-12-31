@@ -2,42 +2,56 @@ const mongoose = require("mongoose");
 
 const EmployeeSchema = new mongoose.Schema(
   {
-    employeeId: { type: String, unique: true },
+    // ✅ MANUAL + EDITABLE EMPLOYEE ID
+    employeeId: {
+      type: String,
+      unique: true,
+      required: true, // must be entered in form
+      trim: true,
+      uppercase: true,
+    },
 
+    // BASIC DETAILS
     name: { type: String, required: true },
     department: { type: String },
     location: { type: String, default: "Office" },
 
+    // SALARY TYPE
     salaryType: {
       type: String,
       enum: ["monthly", "daily", "hourly", "weekly"],
       default: "monthly",
     },
 
+    // SALARY VALUES
     basicSalary: { type: Number, default: 0 },
     dailyWage: { type: Number, default: 0 },
 
+    // CURRENT PENDING INCREMENT
     salaryIncrement: { type: Number, default: 0 },
-    salaryIncrementFrom: { type: String, default: null },
+    salaryIncrementFrom: { type: String, default: null }, // YYYY-MM
 
-    // ✅ FIXED: MUST BE INSIDE SCHEMA
+    // ✅ INCREMENT HISTORY
     salaryIncrementHistory: [
       {
-        amount: Number,
-        fromMonth: String,
+        amount: { type: Number, required: true },
+        fromMonth: { type: String, required: true },
         applied: { type: Boolean, default: false },
-        appliedOn: Date,
+        appliedOn: { type: Date },
       },
     ],
 
+    // OT
     otRate: { type: Number, default: 0 },
 
+    // PAYMENT
     paymentMethod: {
       type: String,
       enum: ["UPI", "Bank Transfer", "Cash"],
       default: "Cash",
     },
 
+    // ACCOUNTING
     gstType: {
       type: String,
       enum: ["GST", "No GST"],
@@ -47,22 +61,10 @@ const EmployeeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ================= AUTO EMPLOYEE ID =================
-EmployeeSchema.pre("save", async function () {
-  if (this.employeeId) return;
+/**
+ * ❌ REMOVED AUTO-GENERATION HOOK
+ * Employee ID is now fully manual & editable
+ */
 
-  const last = await this.constructor
-    .findOne({ employeeId: { $exists: true } })
-    .sort({ createdAt: -1 });
-
-  let nextId = "EMP001";
-
-  if (last?.employeeId) {
-    const num = parseInt(last.employeeId.replace("EMP", ""), 10) + 1;
-    nextId = "EMP" + String(num).padStart(3, "0");
-  }
-
-  this.employeeId = nextId;
-});
-
-module.exports = mongoose.model("Employee", EmployeeSchema);
+module.exports =
+  mongoose.models.Employee || mongoose.model("Employee", EmployeeSchema);

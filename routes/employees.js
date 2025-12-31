@@ -59,22 +59,39 @@ router.post("/", async (req, res) => {
 });
 
 // =====================
-// UPDATE EMPLOYEE
+// ✅ UPDATE EMPLOYEE (FIXED)
 // =====================
 router.put("/:id", async (req, res) => {
   try {
+    const { employeeId } = req.body;
+
+    // 🔐 CHECK DUPLICATE EMPLOYEE ID
+    if (employeeId) {
+      const exists = await Employee.findOne({
+        employeeId,
+        _id: { $ne: req.params.id }, // exclude self
+      });
+
+      if (exists) {
+        return res.status(400).json({
+          message: "Employee ID already exists",
+        });
+      }
+    }
+
     const updated = await Employee.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
 
-    if (!updated)
+    if (!updated) {
       return res.status(404).json({ message: "Employee not found" });
+    }
 
     res.json(updated);
   } catch (err) {
-    console.log(err);
+    console.error("Employee update error:", err);
     res.status(500).json({ message: "Error updating employee" });
   }
 });
