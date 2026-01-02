@@ -19,6 +19,7 @@ mongoose
 // ---------- ROUTES ----------
 // ---------- ROUTES ----------
 app.use("/api/auth", require("./routes/auth"));
+
 app.use("/api/employees", require("./routes/employees"));
 app.use("/api/attendance", require("./routes/attendance"));
 app.use("/api/payroll", require("./routes/payroll"));
